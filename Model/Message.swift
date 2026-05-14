@@ -24,6 +24,7 @@ class Message: Object {
     @Persisted var image: String?
     @Persisted(indexed: true) var group: String?
     @Persisted(indexed: true) var createDate: Date?
+    @Persisted(indexed: true) var expireDate: Date?
 
     var type: BodyType {
         get {
@@ -52,6 +53,9 @@ class Message: Object {
         self.image = json["image"].string
         self.group = json["group"].string
         self.createDate = Date(timeIntervalSince1970: TimeInterval(createDate))
+        if let expireDate = json["expireDate"].int64 {
+            self.expireDate = Date(timeIntervalSince1970: TimeInterval(expireDate))
+        }
     }
     
     convenience init(dict: [String: Any]) {
@@ -82,6 +86,11 @@ class Message: Object {
         }
         if let createDateInterval = dict["createDate"] as? TimeInterval {
             self.createDate = Date(timeIntervalSince1970: createDateInterval)
+        }
+        if let expireDateInterval = dict["expireDate"] as? TimeInterval {
+            self.expireDate = Date(timeIntervalSince1970: expireDateInterval)
+        } else if let expireDateInterval = dict["expireDate"] as? Int64 {
+            self.expireDate = Date(timeIntervalSince1970: TimeInterval(expireDateInterval))
         }
     }
 }

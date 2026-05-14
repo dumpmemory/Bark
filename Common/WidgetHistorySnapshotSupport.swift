@@ -51,7 +51,9 @@ extension WidgetHistoryMessage {
 
 extension Realm {
     func widgetSnapshotItems(limit: Int = WidgetHistoryConstants.snapshotRetentionLimit) -> [WidgetHistoryMessage] {
-        objects(Message.self)
+        let now = Date()
+        return objects(Message.self)
+            .filter("expireDate == nil OR expireDate > %@", now)
             .sorted(byKeyPath: "createDate", ascending: false)
             .prefix(limit)
             .map { WidgetHistoryMessage(message: $0) }

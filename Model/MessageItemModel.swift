@@ -26,14 +26,22 @@ class MessageItemModel {
     var image: String?
     
     var createDate: Date?
+    var expireDate: Date?
     var dateStyle: MessageListCellDateStyle = .relative {
         didSet {
+            var dateText: String?
             switch dateStyle {
             case .relative:
                 dateText = createDate?.agoFormatString()
             case .exact:
                 dateText = createDate?.formatString(format: "yyyy-MM-dd HH:mm")
             }
+            if let expireDate {
+                dateText = [dateText, expireDate.expiryTimeSinceNow]
+                    .compactMap { $0 }
+                    .joined(separator: " · ")
+            }
+            self.dateText = dateText
         }
     }
 
@@ -98,6 +106,7 @@ class MessageItemModel {
         
         self.attributedText = text
         self.createDate = message.createDate
+        self.expireDate = message.expireDate
         self.image = message.image
         defer {
             self.dateStyle = .relative

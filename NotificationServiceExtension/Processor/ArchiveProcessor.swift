@@ -29,10 +29,24 @@ class ArchiveProcessor: NotificationContentProcessor {
             let id = userInfo["id"] as? String
             let markdown = userInfo["markdown"] as? String
 
+            let createDate = Date()
+            let ttl: TimeInterval?
+            if let ttlString = userInfo["ttl"] as? String {
+                ttl = TimeInterval(ttlString)
+            } else if let ttlNumber = userInfo["ttl"] as? NSNumber {
+                ttl = ttlNumber.doubleValue
+            } else {
+                ttl = nil
+            }
+
+            if let ttl, ttl <= 0 {
+                return bestAttemptContent
+            }
+
+            let expireDate = ttl.map { createDate.addingTimeInterval($0) }
+
             // 准备消息数据字典
             var messageDict: [String: Any] = [:]
-            let createDate = Date()
-
             let messageId = (id != nil && !id!.isEmpty) ? id! : UUID().uuidString
             messageDict["id"] = messageId
             
@@ -58,6 +72,9 @@ class ArchiveProcessor: NotificationContentProcessor {
                 messageDict["group"] = group
             }
             messageDict["createDate"] = createDate.timeIntervalSince1970
+            if let expireDate {
+                messageDict["expireDate"] = expireDate.timeIntervalSince1970
+            }
 
             // 写入 plist 文件
             if let groupUrl = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.bark") {

@@ -49,8 +49,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             { _, observer, _, _, _ in
                 guard let observer = observer else { return }
                 let appDelegate = Unmanaged<AppDelegate>.fromOpaque(observer).takeUnretainedValue()
-                DispatchQueue.main.async {
-                    appDelegate.processPendingMessages()
+                Task {
+                    await appDelegate.processPendingMessages()
                 }
             },
             "com.bark.newmessage" as CFString,
@@ -59,7 +59,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         )
         
         // 处理可能在启动前积累的消息
-        processPendingMessages()
+        Task {
+            await processPendingMessages()
+        }
         
         UNUserNotificationCenter.current().delegate = self
         var actions = [
@@ -128,6 +130,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 realm.delete(message)
             }
             WidgetHistorySnapshotStore.shared.refreshFromRealmAsync()
+            notifyMessagesDidChange()
         }
 
         completionHandler(.newData)
@@ -172,7 +175,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         UIApplication.shared.applicationIconBadgeNumber = -1
         
         // 处理待处理的消息
-        processPendingMessages()
+        Task {
+            await processPendingMessages()
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

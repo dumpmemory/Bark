@@ -42,6 +42,30 @@ extension Date {
         }
         return "timeJustNow".localized
     }
+
+    var expiryTimeSinceNow: String {
+        let timeInterval = timeIntervalSinceNow
+
+        if timeInterval > 60 * 60 * 24 * 365 {
+            return "expiryTimeYear".localized(with: Int(timeInterval / (60 * 60 * 24 * 365)))
+        }
+        if timeInterval > 60 * 60 * 24 * 30 {
+            return "expiryTimeMonth".localized(with: Int(timeInterval / (60 * 60 * 24 * 30)))
+        }
+        if timeInterval > 60 * 60 * 24 {
+            return "expiryTimeDay".localized(with: Int(timeInterval / (60 * 60 * 24)))
+        }
+        if timeInterval > 60 * 60 {
+            return "expiryTimeHour".localized(with: Int(timeInterval / (60 * 60)))
+        }
+        if timeInterval > 60 {
+            return "expiryTimeMinute".localized(with: Int(timeInterval / 60))
+        }
+        if timeInterval > 0 {
+            return "expiryTimeSecond".localized(with: Int(timeInterval))
+        }
+        return "expired".localized
+    }
 }
 
 extension Date {

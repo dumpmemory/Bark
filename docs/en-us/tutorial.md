@@ -107,6 +107,7 @@ List of supported parameters, specific effects can be previewed in the APP.
 | group | Group messages, pushes will be displayed in the notification center by group.<br>You can also choose to view different groups in the history message list. |
 | ciphertext | Ciphertext for encrypted push |
 | isArchive | Pass 1 to save the push, pass other values to not save the push, if not passed, it will be decided by the APP settings whether to save. |
+| ttl | Retention time for archived pushes in seconds. Only affects messages saved to history and they will be removed automatically after expiration. |
 | url | URL to jump to when the push is clicked, supports URL Scheme and Universal Link |
 | action | When set to “alert”, tapping the push notification and opening the app will display an action popup. |
 | id | When using the same ID value, it will update the corresponding push notification content<br>Requires Bark v1.5.2, bark-server v2.2.5 or above |

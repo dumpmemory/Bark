@@ -127,10 +127,11 @@ class MessageListViewController: BaseViewController<MessageListViewModel> {
             }).disposed(by: self.rx.disposeBag)
         
         NotificationCenter.default.rx
-            .notification(UIApplication.willEnterForegroundNotification)
-            .delay(.milliseconds(500), scheduler: MainScheduler.instance) // 延迟0.5秒，等待数据库 Results 更新到最新数据集
+            .notification(kBarkMessagesDidChangeNotification)
             .subscribe(onNext: { [weak self] _ in
-                self?.reloadRelay.accept(())
+                // 默认加载未完成前，不执行刷新，避免重复刷新
+                guard let self, self.hasFinishedInitialLoadingTransition else { return }
+                self.reloadRelay.accept(())
             }).disposed(by: rx.disposeBag)
         
         // 点击群组消息，展开群
