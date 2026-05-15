@@ -8,7 +8,7 @@
 
 import UIKit
 
-private let pendingMessageProcessingQueue = DispatchQueue(label: "me.fin.bark.pending-message-processing", qos: .utility)
+private let pendingMessageProcessingQueue = DispatchQueue(label: "me.fin.bark.pending-message-processing", qos: .userInitiated)
 let kBarkMessagesDidChangeNotification = Notification.Name("com.bark.messagesDidChange")
 
 extension AppDelegate {
@@ -96,6 +96,10 @@ extension AppDelegate {
                     return
                 }
 
+                guard let realm = try? Realm() else {
+                    return
+                }
+
                 let pendingMessagesDir = groupUrl.appendingPathComponent("pending_messages")
                 let plistFiles: [URL]
                 if FileManager.default.fileExists(atPath: pendingMessagesDir.path),
@@ -110,23 +114,16 @@ extension AppDelegate {
                     plistFiles = []
                 }
 
-                guard let realm = try? Realm() else {
-                    return
-                }
-
                 var messagesToAdd: [Message] = []
-                var urlsToDelete: [URL] = []
                 let now = Date()
                 var didChangeMessages = false
 
                 for plistUrl in plistFiles {
                     guard let dict = NSDictionary(contentsOf: plistUrl) as? [String: Any] else {
-                        urlsToDelete.append(plistUrl)
                         continue
                     }
 
                     let message = Message(dict: dict)
-                    urlsToDelete.append(plistUrl)
                     if let expireDate = message.expireDate, expireDate <= now {
                         continue
                     }
@@ -155,7 +152,7 @@ extension AppDelegate {
                     }
                 }
 
-                for plistUrl in urlsToDelete {
+                for plistUrl in plistFiles {
                     try? FileManager.default.removeItem(at: plistUrl)
                 }
 
